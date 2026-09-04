@@ -1,8 +1,8 @@
 # Windows 10 Gaming ISO
 
-This repository adds a conservative post-install configuration to an official
-Windows 10 ISO. It does not include Microsoft installation media and does not
-modify `install.wim`.
+This repository provides two conservative ways to customize an official
+Windows 10 ISO. It does not include Microsoft installation media or activation
+material.
 
 ## Repository layout
 
@@ -55,6 +55,24 @@ session on Windows with the Windows ADK `Deployment Tools` installed. This mode
 mounts one selected `install.wim` edition, removes the explicit optional AppX
 list offline, recompresses the WIM and rebuilds the BIOS/UEFI bootable ISO.
 
+Requirements:
+
+- A Windows 10/11 build host running PowerShell as Administrator.
+- Windows ADK with only `Deployment Tools` selected.
+- An official ISO containing `sources\install.wim`.
+- A destination folder with enough free space for the temporary mounted image
+  and the generated ISO.
+
+To inspect the available editions before choosing an index:
+
+```powershell
+dism /Get-WimInfo /WimFile:D:\Downloads\Windows10\sources\install.wim
+```
+
+The input ISO must first be mounted or extracted so the `install.wim` index can
+be inspected. The builder itself mounts the ISO, copies its contents, services
+the selected index, and creates the output ISO.
+
 ```powershell
 .\build-windows.ps1 -Iso "D:\Downloads\Windows10.iso" -OutputIso "D:\Build\Windows10-Gaming.iso" -EditionIndex 1
 ```
@@ -63,6 +81,10 @@ The default edition index is `1`. Confirm the correct index for the official ISO
 before building. The Windows builder currently requires `sources\install.wim`;
 ISOs containing only `install.esd` must be converted separately with DISM.
 
+The builder does not automate disk partitioning, account creation, passwords,
+product keys or activation. It refuses to overwrite an existing output ISO and
+cleans its temporary working directory after completion or failure.
+
 ## Important limitations
 
 The Linux/macOS method does not physically shrink the WIM or remove packages
@@ -70,6 +92,19 @@ offline. Use the Windows builder when that behavior is required.
 
 Review the app and service lists before using the ISO on production hardware.
 Keep the official ISO and a normal Windows installation path available.
+
+## Continuous integration
+
+GitHub Actions validates every push and pull request with:
+
+- ShellCheck for `build.sh`.
+- XML parsing for `autounattend.xml`.
+- PSScriptAnalyzer for both PowerShell builders.
+- A consistency check for the embedded `$OEM$` PowerShell copy.
+- Git whitespace validation.
+
+CI performs static validation only. It never builds a Windows ISO, mounts a
+WIM, changes a Windows installation or handles secrets.
 
 ## Safety boundaries
 
