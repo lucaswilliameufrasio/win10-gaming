@@ -9,7 +9,7 @@ fi
 
 source_iso="$1"
 output_iso="${2:-Windows10-Gaming.iso}"
-repository_root="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+repository_root="$(cd -- "$(dirname -- "$0")" && pwd -P)"
 
 if [[ ! -f "$source_iso" ]]; then
     printf 'The source ISO does not exist or is not a regular file.\n' >&2
