@@ -1,0 +1,26 @@
+# Never commit proprietary installation media or generated artifacts.
+*.iso
+*.wim
+*.esd
+*.vhd
+*.vhdx
+*.qcow2
+
+# Local build output and diagnostics.
+build/
+dist/
+tmp/
+*.log
+
+# Local configuration and secret material.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+
+# Host-specific files.
+.DS_Store
+Thumbs.db

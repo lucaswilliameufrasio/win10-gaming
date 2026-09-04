@@ -1,0 +1,38 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install --yes shellcheck
+
+      - name: Lint shell script
+        run: shellcheck --severity=warning build.sh
+
+      - name: Validate XML
+        run: xmllint --noout autounattend.xml
+
+      - name: Validate PowerShell
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force -ErrorAction Stop
+          Invoke-ScriptAnalyzer -Path scripts/debloat.ps1 -Severity Error -EnableExit
+
+      - name: Check embedded PowerShell copy
+        run: cmp --silent scripts/debloat.ps1 'oem/$OEM$/$1/GamingSetup/debloat.ps1'
+
+      - name: Check whitespace
+        run: git diff --check
