@@ -29,7 +29,8 @@ jobs:
         run: |
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force -ErrorAction Stop
-          Invoke-ScriptAnalyzer -Path scripts/debloat.ps1, build-windows.ps1 -Severity Error -EnableExit
+          Invoke-ScriptAnalyzer -Path scripts/debloat.ps1 -Severity Error -EnableExit
+          Invoke-ScriptAnalyzer -Path build-windows.ps1 -Severity Error -EnableExit
 
       - name: Check embedded PowerShell copy
         run: cmp --silent scripts/debloat.ps1 'oem/$OEM$/$1/GamingSetup/debloat.ps1'
