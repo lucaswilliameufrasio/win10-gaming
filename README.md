@@ -21,6 +21,11 @@ The PowerShell file is kept in both locations intentionally: `scripts/` is the
 source file for review, and the `$OEM$` copy is the file Windows Setup places
 at `C:\GamingSetup\debloat.ps1`.
 
+`oem/$OEM$/$$/Setup/Scripts/SetupComplete.cmd` starts the configuration as
+`SYSTEM` before the first user logon. This is the primary execution path for
+service and policy changes. `FirstLogonCommands` remains as an idempotent
+fallback for installations where `SetupComplete.cmd` is skipped.
+
 ## What it changes
 
 - Removes a small, explicit list of optional provisioned apps.
@@ -28,6 +33,8 @@ at `C:\GamingSetup\debloat.ps1`.
   remote registry.
 - Disables Windows consumer suggestions through policy.
 - Requests the minimum telemetry level supported by the installed edition.
+- Creates a local marker after successful completion so the fallback does not
+  apply the same changes twice.
 
 It intentionally leaves Windows Update, Defender, Firewall, networking,
 Bluetooth, printing, audio, webcam, Store, Xbox, Game Pass and gaming
@@ -84,6 +91,16 @@ ISOs containing only `install.esd` must be converted separately with DISM.
 The builder does not automate disk partitioning, account creation, passwords,
 product keys or activation. It refuses to overwrite an existing output ISO and
 cleans its temporary working directory after completion or failure.
+
+After installation, verify the intended result with an elevated PowerShell
+session. For example, check that the Fax service is disabled:
+
+```powershell
+Get-Service -Name Fax
+```
+
+The service check is only a validation example; the script does not remove the
+Windows Fax and Scan capability itself.
 
 ## Important limitations
 

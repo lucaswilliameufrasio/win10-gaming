@@ -1,5 +1,10 @@
 $ErrorActionPreference = "Continue"
 
+$configurationMarkerPath = "C:\ProgramData\Win10Gaming\configuration-complete.marker"
+if (Test-Path -LiteralPath $configurationMarkerPath) {
+    exit 0
+}
+
 $currentIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()
 $currentPrincipal = [Security.Principal.WindowsPrincipal]::new($currentIdentity)
 $administratorRole = [Security.Principal.WindowsBuiltInRole]::Administrator
@@ -77,5 +82,8 @@ Set-ItemProperty `
     -Name "AllowTelemetry" `
     -Type DWord `
     -Value 0
+
+New-Item -Path (Split-Path -Path $configurationMarkerPath -Parent) -ItemType Directory -Force | Out-Null
+New-Item -Path $configurationMarkerPath -ItemType File -Force | Out-Null
 
 Write-Host "Windows 10 Gaming configuration completed."

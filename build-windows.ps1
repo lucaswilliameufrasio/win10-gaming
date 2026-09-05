@@ -155,6 +155,11 @@ try {
     New-Item -Path $oemTargetPath -ItemType Directory -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $oemSourcePath "debloat.ps1") -Destination $oemTargetPath -Force
 
+    $setupCompleteSourcePath = Join-Path $PSScriptRoot 'oem\$OEM$\$$\Setup\Scripts\SetupComplete.cmd'
+    $setupCompleteTargetPath = Join-Path $mediaPath 'sources\$OEM$\$$\Setup\Scripts'
+    New-Item -Path $setupCompleteTargetPath -ItemType Directory -Force | Out-Null
+    Copy-Item -LiteralPath $setupCompleteSourcePath -Destination $setupCompleteTargetPath -Force
+
     Write-Host "[8/8] Building bootable ISO"
     $biosBootFile = Join-Path $mediaPath "boot\etfsboot.com"
     $uefiBootFile = Join-Path $mediaPath "efi\microsoft\boot\efisys.bin"
