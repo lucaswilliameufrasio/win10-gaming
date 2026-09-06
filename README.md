@@ -70,6 +70,46 @@ Requirements:
 - A destination folder with enough free space for the temporary mounted image
   and the generated ISO.
 
+### PowerShell execution policy
+
+Windows client installations commonly use `Restricted`, which blocks direct
+execution of local `.ps1` files. Do not change the computer-wide policy to
+`Unrestricted` for this project. The safer one-time option is to start the
+builder in a process whose policy is `Bypass`:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build-windows.ps1 -Iso "D:\Downloads\Windows10.iso" -OutputIso "D:\Build\Windows10-Gaming.iso" -EditionIndex 1
+```
+
+If the builder is already being called from the current PowerShell window, use
+the process scope instead of changing `LocalMachine` or `CurrentUser`:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+.\build-windows.ps1 -Iso "D:\Downloads\Windows10.iso" -OutputIso "D:\Build\Windows10-Gaming.iso" -EditionIndex 1
+```
+
+The `Process` setting disappears when that PowerShell window closes. Check all
+policy scopes before troubleshooting restrictions:
+
+```powershell
+Get-ExecutionPolicy -List
+```
+
+If the repository was downloaded as an archive and the machine uses
+`RemoteSigned`, first review the code and then remove only the downloaded-file
+block:
+
+```powershell
+Unblock-File -LiteralPath .\build-windows.ps1
+Unblock-File -LiteralPath .\scripts\debloat.ps1
+```
+
+Group Policy can override local settings. Do not try to bypass an organization
+policy; use an authorized test VM instead. See the Microsoft documentation for
+[`Set-ExecutionPolicy`](https://learn.microsoft.com/powershell/module/microsoft.powershell.security/set-executionpolicy)
+and [`Get-ExecutionPolicy`](https://learn.microsoft.com/powershell/module/microsoft.powershell.security/get-executionpolicy).
+
 To inspect the available editions before choosing an index:
 
 ```powershell
