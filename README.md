@@ -123,6 +123,9 @@ GitHub Actions validates every push and pull request with:
 CI performs static validation only. It never builds a Windows ISO, mounts a
 WIM, changes a Windows installation or handles secrets.
 
+For the maintenance workflow, analysis checklist, VM setup, removal criteria
+and future improvements, see [`docs/IMPROVEMENT_GUIDE.md`](docs/IMPROVEMENT_GUIDE.md).
+
 ## Safety boundaries
 
 - Do not commit ISO files, install images, logs, credentials or activation
