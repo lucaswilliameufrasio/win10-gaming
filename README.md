@@ -14,7 +14,8 @@ win10-gaming/
 ├── scripts/
 │   └── debloat.ps1
 └── oem/
-    └── $OEM$/$1/GamingSetup/debloat.ps1
+    ├── $OEM$/$1/GamingSetup/debloat.ps1
+    └── $OEM$/$$/Setup/Scripts/SetupComplete.cmd
 ```
 
 The PowerShell file is kept in both locations intentionally: `scripts/` is the
@@ -33,8 +34,9 @@ fallback for installations where `SetupComplete.cmd` is skipped.
   remote registry.
 - Disables Windows consumer suggestions through policy.
 - Requests the minimum telemetry level supported by the installed edition.
-- Creates a local marker after successful completion so the fallback does not
-  apply the same changes twice.
+- Creates a local marker after the script finishes so the fallback does not
+  apply the same changes twice. Operation failures are not yet reliably
+  reflected in that marker; see the improvement guide's failure-reporting rule.
 
 It intentionally leaves Windows Update, Defender, Firewall, networking,
 Bluetooth, printing, audio, webcam, Store, Xbox, Game Pass and gaming
@@ -52,8 +54,10 @@ or untrusted ISO.
 
 The command must be run manually. It refuses to overwrite an existing output
 file, keeps the original `install.wim`, and replays the source ISO boot data.
-The resulting ISO still performs the regular interactive Windows setup. The
-PowerShell configuration runs once at the first user logon.
+The resulting ISO still performs the regular interactive Windows setup.
+`SetupComplete.cmd` normally applies the PowerShell configuration as `SYSTEM`
+before the first user logon; `FirstLogonCommands` is the idempotent fallback if
+SetupComplete is skipped.
 
 ## Build on Windows
 
@@ -61,14 +65,18 @@ For a physically smaller ISO, run `build-windows.ps1` from an elevated PowerShel
 session on Windows with the Windows ADK `Deployment Tools` installed. This mode
 mounts one selected `install.wim` edition, removes the explicit optional AppX
 list offline, recompresses the WIM and rebuilds the BIOS/UEFI bootable ISO.
+The output WIM contains only the selected edition, exported as its sole image
+index. The current answer file targets x64 (`amd64`) installation media.
 
 Requirements:
 
-- A Windows 10/11 build host running PowerShell as Administrator.
+- A Windows 10 22H2 x64 build host running PowerShell as Administrator.
 - Windows ADK with only `Deployment Tools` selected.
 - An official ISO containing `sources\install.wim`.
-- A destination folder with enough free space for the temporary mounted image
-  and the generated ISO.
+- Enough free space on the volume containing `$env:TEMP` for staged media and
+  the temporary mounted image.
+- Enough free space on the output volume for the generated ISO. These may be
+  different volumes, so free space in the output folder alone is not enough.
 
 ### PowerShell execution policy
 
@@ -156,7 +164,7 @@ GitHub Actions validates every push and pull request with:
 
 - ShellCheck for `build.sh`.
 - XML parsing for `autounattend.xml`.
-- PSScriptAnalyzer for both PowerShell builders.
+- PSScriptAnalyzer for the PowerShell builder and debloat script.
 - A consistency check for the embedded `$OEM$` PowerShell copy.
 - Git whitespace validation.
 

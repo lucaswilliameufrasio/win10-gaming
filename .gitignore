@@ -1,10 +1,10 @@
 # Never commit proprietary installation media or generated artifacts.
-*.iso
-*.wim
-*.esd
-*.vhd
-*.vhdx
-*.qcow2
+*.[iI][sS][oO]
+*.[wW][iI][mM]
+*.[eE][sS][dD]
+*.[vV][hH][dD]
+*.[vV][hH][dD][xX]
+*.[qQ][cC][oO][wW]2
 
 # Local build output and diagnostics.
 build/
