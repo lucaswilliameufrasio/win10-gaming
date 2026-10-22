@@ -141,7 +141,7 @@ try {
     Invoke-DeploymentCommand "dism.exe" @(
         "/Export-Image",
         "/SourceImageFile:$installWimPath",
-        "/SourceIndex:1",
+        "/SourceIndex:$EditionIndex",
         "/DestinationImageFile:$optimizedWimPath",
         "/Compress:max",
         "/CheckIntegrity"

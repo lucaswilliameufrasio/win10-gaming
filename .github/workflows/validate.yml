@@ -32,6 +32,15 @@ jobs:
           Invoke-ScriptAnalyzer -Path scripts/debloat.ps1 -Severity Error -EnableExit
           Invoke-ScriptAnalyzer -Path build-windows.ps1 -Severity Error -EnableExit
 
+      - name: Ensure selected edition is exported
+        shell: pwsh
+        run: |
+          $builder = Get-Content -LiteralPath build-windows.ps1 -Raw
+          $expected = '"/SourceIndex:$EditionIndex"'
+          if (-not $builder.Contains($expected)) {
+              throw "The Windows builder must export the selected edition index."
+          }
+
       - name: Check embedded PowerShell copy
         run: cmp --silent scripts/debloat.ps1 'oem/$OEM$/$1/GamingSetup/debloat.ps1'
 
